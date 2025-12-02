@@ -1,0 +1,18 @@
+# frontend/Dockerfile.dev
+
+# Usar una imagen base de Node para desarrollo
+FROM node:20-alpine
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copiar package.json y package-lock.json (o yarn.lock) para instalar dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Exponer el puerto de desarrollo de Angular
+EXPOSE 4200
+
+# El comando de ejecución se definirá en docker-compose.yml para usar 'ng serve'
