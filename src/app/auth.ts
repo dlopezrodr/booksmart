@@ -2,33 +2,36 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+// Importamos la interfaz para la respuesta del login.
 import { LoginResponse } from './models/login-response'; 
-import { UserCredentials } from './models/user-credentials'; // Creamos un modelo para las credenciales, opcional pero buena práctica
+// Importamos la interfaz para las credenciales.
+import { UserCredentials } from './models/user-credentials';
 
 @Injectable({
   providedIn: 'root'
 })
-// Asumiendo que esta es tu clase principal, que usarás como AuthService
 export class AuthService { 
-  // URL de login definida en Symfony (ruta /api/login)
-  private loginUrl = 'http://backend/api/login'; 
+  // 1. CORRECCIÓN: Usar la ruta de verificación JWT configurada en security.yaml
+  //    (Si estás usando Docker, 'backend' no funciona; debes usar 'http://localhost:8000'
+  //     o la dirección IP de tu contenedor Symfony si lo accedes desde el host.)
+  private readonly loginUrl = 'http://localhost:8000/api/login_check'; 
   
   // Clave para guardar el token
-  private readonly TOKEN_KEY = 'authToken';
+  private readonly TOKEN_KEY = 'jwt_token'; // Usamos jwt_token por convención
 
   constructor(private http: HttpClient) { }
 
   /**
-   * Intenta autenticar al usuario enviando las credenciales a Symfony.
-   * Tipado: Observable<LoginResponse> para resolver el error ts(7006).
+   * Intenta autenticar al usuario enviando un objeto UserCredentials a Symfony.
    */
   login(username: string, password: string): Observable<LoginResponse> {
-    const credentials = { username, password };
+    // 2. CREACIÓN DEL OBJETO: Crear el objeto de credenciales.
+    const credentials: UserCredentials = { username, password };
     
-    // El .post<LoginResponse> tipa la respuesta que se espera
+    // 3. LLAMADA POST: Envía el objeto a /api/login_check
     return this.http.post<LoginResponse>(this.loginUrl, credentials)
       .pipe(
-        // Utiliza 'tap' para ejecutar código side-effect (guardar el token)
+        // Almacena el token de la respuesta exitosa.
         tap((response: LoginResponse) => {
           this.saveToken(response.token);
         })
@@ -51,7 +54,6 @@ export class AuthService {
 
   /**
    * Verifica si el usuario está logueado basándose en la existencia del token.
-   * En un proyecto real, también se debe verificar la caducidad del token.
    */
   isLoggedIn(): boolean {
     return !!this.getToken();

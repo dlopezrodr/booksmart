@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  standalone: true, // <-- ¡CORRECCIÓN CLAVE!
   imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'

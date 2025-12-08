@@ -1,0 +1,26 @@
+<div class="min-h-screen flex items-center justify-center text-center p-4" 
+     style="background: linear-gradient(135deg, #1f2937, #4f46e5);">
+    <div class="max-w-3xl mx-auto space-y-8 text-white">
+        
+        <svg class="w-12 h-12 mx-auto text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.42 9.25 5.23 7.625 5.564 6.001 5.898 4.625 6.786 3.75 8.125s-1.125 3.033-0.563 4.687c0.562 1.654 1.75 3.033 3.313 3.911 1.562 0.878 3.438 1.125 5.313 0.687v2.531m0-13C13.168 5.42 14.75 5.23 16.375 5.564 18.001 5.898 19.375 6.786 20.25 8.125s1.125 3.033 0.563 4.687c-0.562 1.654-1.75 3.033-3.313 3.911-1.562 0.878-3.438 1.125-5.313 0.687">
+            </path>
+        </svg>
+
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
+            {{ title }}
+        </h1>
+
+        <p class="text-lg md:text-xl text-indigo-200">
+            {{ subtitle }}
+        </p>
+
+        <div class="pt-4">
+            <a [routerLink]="buttonLink"
+               class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300 transform hover:scale-105">
+                {{ buttonText }} →
+            </a>
+        </div>
+        
+    </div>
+</div>

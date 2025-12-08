@@ -1,14 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth'; // Servicio de autenticación
+import { ReactiveFormsModule } from '@angular/forms'; // <-- ¡IMPORTAR AQUÍ!
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,        // <-- ¡SOLUCIONA NG8103 (*ngIf)!
+    ReactiveFormsModule, // <-- ¡SOLUCIONA NG8002 ([formGroup])!
+    RouterModule         
+  ],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class login implements OnInit {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   error: string | null = null; // Para mostrar errores de credenciales
 
@@ -38,19 +46,31 @@ export class login implements OnInit {
       const { username, password } = this.loginForm.value;
 
       this.authService.login(username, password).subscribe({
+        
+        // 1. Manejo Exitoso (Success)
         next: (response) => {
-          // Asumimos que la respuesta exitosa incluye un token o similar
-          console.log('Login exitoso', response);
-          this.router.navigate(['/home']); // Redirigir después del éxito
+          // Si el login fue exitoso, el token ya está guardado por el AuthService.
+          console.log('Login successful, token received:', response.token);
+          
+          // Navegar a la página principal (o a una página de dashboard)
+          this.router.navigate(['/']); 
         },
+
+        // 2. Manejo de Errores (Error)
         error: (err) => {
-          // Symfony devuelve típicamente un error 401 si las credenciales son incorrectas
-          this.error = 'Credenciales inválidas. Inténtalo de nuevo.';
-          console.error('Error de autenticación:', err);
+          console.error('Login error:', err);
+          
+          // El backend de Symfony/JWT devuelve un error 401 si las credenciales son inválidas.
+          // Usamos un mensaje genérico por seguridad.
+          this.error = 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
+          
+          // Opcional: limpiar la contraseña después de un fallo
+          this.loginForm.controls['password'].reset();
         }
       });
     } else {
-      this.error = 'Por favor, introduce tu usuario y contraseña.';
+      // Si el formulario no es válido (ej. campos vacíos)
+      this.error = 'Por favor, introduce el nombre de usuario y la contraseña.';
     }
   }
 }
