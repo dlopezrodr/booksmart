@@ -1,0 +1,85 @@
+<p>create-book works!</p>
+<div class="max-w-xl mx-auto p-8 bg-white shadow-xl rounded-lg mt-10">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Crear Nuevo Libro</h2>
+
+    <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
+
+        <div class="mb-4">
+            <label for="title" class="block text-gray-700 font-semibold mb-2">Título</label>
+            <input 
+                id="title" 
+                type="text" 
+                formControlName="title" 
+                class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': f['title'].invalid && (f['title'].dirty || f['title'].touched)}"
+            >
+            <div *ngIf="f['title'].invalid && (f['title'].dirty || f['title'].touched)" class="text-red-500 text-sm mt-1">
+                El título es obligatorio.
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label for="author" class="block text-gray-700 font-semibold mb-2">Autor</label>
+            <input 
+                id="author" 
+                type="text" 
+                formControlName="author" 
+                class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': f['author'].invalid && (f['author'].dirty || f['author'].touched)}"
+            >
+            <div *ngIf="f['author'].invalid && (f['author'].dirty || f['author'].touched)" class="text-red-500 text-sm mt-1">
+                El autor es obligatorio.
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label for="isbn" class="block text-gray-700 font-semibold mb-2">ISBN</label>
+            <input 
+                id="isbn" 
+                type="text" 
+                formControlName="isbn" 
+                class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': f['isbn'].invalid && (f['isbn'].dirty || f['isbn'].touched)}"
+            >
+            <div *ngIf="f['isbn'].invalid && (f['isbn'].dirty || f['isbn'].touched)" class="text-red-500 text-sm mt-1">
+                <span *ngIf="f['isbn'].errors?.['required']">El ISBN es obligatorio.</span>
+                <span *ngIf="f['isbn'].errors?.['pattern']">Formato ISBN inválido.</span>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label for="publicationDate" class="block text-gray-700 font-semibold mb-2">Fecha de Publicación</label>
+            <input 
+                id="publicationDate" 
+                type="date" 
+                formControlName="publicationDate" 
+                class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': f['publicationDate'].invalid && (f['publicationDate'].dirty || f['publicationDate'].touched)}"
+            >
+            <div *ngIf="f['publicationDate'].invalid && (f['publicationDate'].dirty || f['publicationDate'].touched)" class="text-red-500 text-sm mt-1">
+                La fecha es obligatoria.
+            </div>
+        </div>
+        
+        <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+            {{ error }}
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <button 
+                type="button" 
+                (click)="router.navigate(['/books'])" 
+                class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition duration-150"
+            >
+                Cancelar
+            </button>
+            <button 
+                type="submit" 
+                [disabled]="bookForm.invalid" 
+                class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-150 disabled:opacity-50"
+            >
+                Guardar Libro
+            </button>
+        </div>
+    </form>
+</div>

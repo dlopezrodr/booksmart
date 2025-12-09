@@ -1,24 +1,55 @@
-import { Component } from '@angular/core';
+// src/app/hero/hero.component.ts
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { AuthService } from '../auth'; // Asume que tienes este servicio
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; // Necesario para el routerLink
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-hero',
-  standalone: true, // Componente independiente (Standalone)
-  imports: [CommonModule, RouterModule], 
-  /*template: `
-    <div class="min-h-screen flex items-center justify-center text-center p-4" 
-     style="background: linear-gradient(135deg, #1f2937, #4f46e5);">
-        <h1>¡LA HERO PAGE FINALMENTE FUNCIONA!</h1>
-        </div>
-  `, // <--- Elimina la línea templateUrl*/
   templateUrl: './hero.html',
-  styleUrls: ['./hero.css'] // Si quieres añadir estilos específicos
+  styleUrls: ['./hero.css'],
+  standalone: true,
+  imports: [
+    CommonModule // 👈 ¡AÑADIR CommonModule aquí! Esto incluye DatePipe, NgIf, etc.
+  ],
 })
-export class HeroComponent {
-  title = 'Biblioteca Digital';
-  subtitle = 'Explora un vasto catálogo de libros, gestiona tus proyectos y descubre nuevos autores. Ordena el conocimiento y empodera el mundo al alcance de tu mano.';
-  buttonText = 'Acceder/Login';
-  // Define la ruta del botón para que vaya al componente de login
-  buttonLink = '/login'; 
+export class HeroComponent implements OnInit {
+  // Observable que emite true/false según si el usuario está logueado
+  isLoggedIn$!: Observable<boolean>; 
+  
+  // Nombre del usuario (debería venir de un Observable en el servicio también)
+  userName$!: Observable<string>; 
+  constructor(private authService: AuthService, private router: Router) { 
+    console.log('HeroComponent cargado. Servicio de Auth:', this.authService);
+  }
+
+  ngOnInit(): void {
+    // Inicializa el Observable del estado de login
+    this.isLoggedIn$ = this.authService.isLoggedIn$; 
+    
+    // (Opcional) Suscribirse para obtener el nombre de usuario
+    this.authService.getCurrentUserName().subscribe(name => {
+      this.userName$ = this.authService.getCurrentUserName();
+    });
+  }
+
+  onLogin(): void {
+    // Redirige a la página de login o abre un modal
+    console.log('Navegando a /login');
+    this.router.navigate(['/login']);
+  }
+
+  onLogout(): void {
+    // Llama al método del servicio que elimina el token
+    this.authService.logout(); 
+    console.log('Usuario ha cerrado sesión.');
+  }
+  onDiscover(): void {
+    // Redirigir a la ruta definida en app.routes.ts como 'books'
+    this.router.navigate(['/books']); 
+    console.log('--- Intentando navegar a /books ---');
+    console.log('Navegando a la lista de libros.');
+  }
 }

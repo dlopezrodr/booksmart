@@ -3,14 +3,17 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth'; // Servicio de autenticación
-import { ReactiveFormsModule } from '@angular/forms'; // <-- ¡IMPORTAR AQUÍ!
+import { ReactiveFormsModule } from '@angular/forms';
+
+// 💥 AÑADIDO: Importar operadores necesarios para la verificación reactiva
+import { filter, take } from 'rxjs/operators'; 
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,        // <-- ¡SOLUCIONA NG8103 (*ngIf)!
-    ReactiveFormsModule, // <-- ¡SOLUCIONA NG8002 ([formGroup])!
+    CommonModule,        
+    ReactiveFormsModule, 
     RouterModule         
   ],
   templateUrl: './login.html',
@@ -18,14 +21,13 @@ import { ReactiveFormsModule } from '@angular/forms'; // <-- ¡IMPORTAR AQUÍ!
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  error: string | null = null; // Para mostrar errores de credenciales
+  error: string | null = null; 
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
   ) {
-    // Inicialización del formulario reactivo
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required]
@@ -33,14 +35,22 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Si el usuario ya está autenticado, redirigir a la página principal
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/home']);
-    }
+    // 💥 CORRECCIÓN: Usar el Observable isLoggedIn$ para verificar el estado
+    this.authService.isLoggedIn$
+      .pipe(
+        // 1. Solo deja pasar valores cuando el usuario SÍ esté logueado (true)
+        filter(isLoggedIn => isLoggedIn), 
+        // 2. Tomar solo el primer valor que cumpla la condición y luego cancelar la suscripción
+        take(1) 
+      )
+      .subscribe(() => {
+        // 3. Redirigir si la condición se cumple
+        this.router.navigate(['/home']);
+      });
   }
 
   onSubmit(): void {
-    this.error = null; // Limpiar errores anteriores
+    this.error = null;
 
     if (this.loginForm.valid) {
       const { username, password } = this.loginForm.value;
@@ -49,10 +59,10 @@ export class LoginComponent implements OnInit {
         
         // 1. Manejo Exitoso (Success)
         next: (response) => {
-          // Si el login fue exitoso, el token ya está guardado por el AuthService.
           console.log('Login successful, token received:', response.token);
-          
-          // Navegar a la página principal (o a una página de dashboard)
+          // La navegación ocurrirá automáticamente porque el Observable isLoggedIn$
+          // se actualizará a 'true' en el servicio y el ngOnInit lo interceptará.
+          // Sin embargo, es buena práctica forzar la navegación aquí también:
           this.router.navigate(['/']); 
         },
 
@@ -60,16 +70,17 @@ export class LoginComponent implements OnInit {
         error: (err) => {
           console.error('Login error:', err);
           
-          // El backend de Symfony/JWT devuelve un error 401 si las credenciales son inválidas.
-          // Usamos un mensaje genérico por seguridad.
-          this.error = 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
+          // Verificar si el error es 401 Unauthorized para mensaje específico
+          if (err.status === 401) {
+             this.error = 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
+          } else {
+             this.error = 'Ocurrió un error al conectar con el servidor.';
+          }
           
-          // Opcional: limpiar la contraseña después de un fallo
           this.loginForm.controls['password'].reset();
         }
       });
     } else {
-      // Si el formulario no es válido (ej. campos vacíos)
       this.error = 'Por favor, introduce el nombre de usuario y la contraseña.';
     }
   }
