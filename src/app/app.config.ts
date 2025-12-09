@@ -2,8 +2,9 @@
 
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http'; // 💥 Importación esencial para HTTP
-import { ReactiveFormsModule } from '@angular/forms'; // Módulo para formularios
+import { provideHttpClient, withInterceptors } from '@angular/common/http'; // 💥 Importar withInterceptors
+import { ReactiveFormsModule } from '@angular/forms';
+import { authInterceptor } from './auth/auth.interceptor'; // 💥 Importar el interceptor
 
 import { routes } from './app.routes';
 
@@ -11,10 +12,9 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     
-    // 1. 💥 Habilita el cliente HTTP (Necesario para BookService, AuthService, etc.)
-    provideHttpClient(),
+    // 💥 Registrar el interceptor
+    provideHttpClient(withInterceptors([authInterceptor])),
     
-    // 2. Habilita las directivas [formGroup] y [formControlName]
     importProvidersFrom(ReactiveFormsModule)
   ]
 };
